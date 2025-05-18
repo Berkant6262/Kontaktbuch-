@@ -128,7 +128,7 @@ if __name__ == "__main__":
         print("1 - Kontakt hinzufügen")
         print("2 - Kontakte anzeigen")
         print("3 - Kontakt löschen")
-        print("4 - Kontakt bearbeiten (in Entwicklung)")
+        print("4 - Kontakt bearbeiten ")
         print("0 - Programm beenden")
         print("----------------------------")
 
