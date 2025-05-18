@@ -77,6 +77,47 @@ def kontakte_loeschen(db):
     db.commit()
     print("Kontakt wurde gelöscht.\n")
 
+def kontakte_bearbeiten(db):
+    name = input("Name des Kontakts zum Bearbeiten eingeben: ")
+    treffer = kontakte_suchen(db, name)
+
+    if not treffer:
+        print("\nKein Kontakt gefunden.\n")
+        return
+
+    print("\nGefundene Kontakte:")
+    for k in treffer:
+        print(f"ID: {k[0]}, Name: {k[1]}, Telefon: {k[2]}, Email: {k[3]}")
+
+    try:
+        id_bearbeiten = int(input("\nID des zu bearbeitenden Kontakts eingeben: "))
+    except ValueError:
+        print("Ungültige Eingabe.")
+        return
+
+    cursor = db.cursor()
+    cursor.execute("SELECT name, telefon, email FROM kontakte WHERE id = ?", (id_bearbeiten,))
+    kontakt = cursor.fetchone()
+
+    if not kontakt:
+        print("Kontakt mit dieser ID wurde nicht gefunden.")
+        return
+
+    print("\nNeuen Wert eingeben (leer lassen zum Beibehalten):")
+    neuer_name = input(f"Name [{kontakt[0]}]: ") or kontakt[0]
+    neuer_telefon = input(f"Telefon [{kontakt[1]}]: ") or kontakt[1]
+    neuer_email = input(f"E-Mail [{kontakt[2]}]: ") or kontakt[2]
+
+    cursor.execute("""
+        UPDATE kontakte
+        SET name = ?, telefon = ?, email = ?
+        WHERE id = ?
+    """, (neuer_name, neuer_telefon, neuer_email, id_bearbeiten))
+
+    db.commit()
+    print("Kontakt wurde aktualisiert.\n")
+
+
 # Hauptprogramm
 if __name__ == "__main__":
     db = connect_db()
@@ -112,6 +153,6 @@ if __name__ == "__main__":
         elif auswahl == 3:
             kontakte_loeschen(db)
         elif auswahl == 4:
-            print("Funktion zum Bearbeiten wird noch entwickelt.\n")
+            kontakte_bearbeiten(db)
         else:
             print("Ungültige Auswahl.\n")
