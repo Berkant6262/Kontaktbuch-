@@ -44,7 +44,7 @@ def kontakte_anzeigen(_db):
     alle = _cursor.fetchall()
     for kontakt in alle:
         print(kontakt)
-
+    print("\n")
 
 if __name__ == "__main__":
     _db = connect_db()
