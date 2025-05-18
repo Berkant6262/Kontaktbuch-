@@ -1,19 +1,15 @@
 import sqlite3
 import os
 
-#Terminal clearen, bei Python gibt es keinen direkten Befehel
+# Bildschirm löschen (Windows/Linux/Mac)
 def clear_screen():
-    if os.name == 'nt': #Falls das Betriebssystem Windows ist
-        os.system('cls')
-    else:
-        os.system('clear') # Linux oder Mac
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-#Erstellen der Datenbank 
+# Verbindung zur SQLite-Datenbank herstellen
 def connect_db():
-    _db = sqlite3.connect("kontakte.db")  # Erstellt die Datei kontakte.db, wenn nicht da
-    _cursor = _db.cursor()
-    # Tabelle Kontakte mit id, name, telefon, email
-    _cursor.execute("""
+    db = sqlite3.connect("kontakte.db")
+    cursor = db.cursor()
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS kontakte (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -21,50 +17,101 @@ def connect_db():
             email TEXT
         )
     """)
-    _db.commit()
-    return _db
-
-#Fuegt Kontakte (Einträge in die Tabelle)
-def kontakt_hinzufügen(db,name,telefon,email):
-    _cursor = db.cursor()
-    _cursor.execute("""
-                INSERT INTO kontakte (name,telefon, email)
-                VALUES (?,?,?)
-                """,
-                (name,telefon,email) 
-                )
-
     db.commit()
-    print("Kontakt wurde hinzugefügt")
+    return db
 
-#Zeigt die Kontakte an die mein bereits in der Datenbank hat 
-def kontakte_anzeigen(_db):
-    _cursor = _db.cursor()
-    _cursor.execute("SELECT * FROM kontakte")
-    alle = _cursor.fetchall()
-    for kontakt in alle:
-        print(kontakt)
-    print("\n")
+# Kontakt zur Datenbank hinzufügen
+def kontakt_hinzufuegen(db, name, telefon, email):
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO kontakte (name, telefon, email) VALUES (?, ?, ?)",
+        (name, telefon, email)
+    )
+    db.commit()
+    print("\nKontakt wurde hinzugefügt.\n")
 
+# Alle Kontakte anzeigen
+def kontakte_anzeigen(db):
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM kontakte")
+    kontakte = cursor.fetchall()
+
+    if not kontakte:
+        print("\nKeine Kontakte gefunden.\n")
+    else:
+        print("\nKontakte:")
+        for k in kontakte:
+            print(f"ID: {k[0]}, Name: {k[1]}, Telefon: {k[2]}, Email: {k[3]}")
+        print()
+
+# Kontakte nach Name suchen
+def kontakte_suchen(db, suchname):
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT id, name, telefon, email FROM kontakte WHERE name LIKE ?",
+        ('%' + suchname + '%',)
+    )
+    return cursor.fetchall()
+
+# Kontakt löschen
+def kontakte_loeschen(db):
+    name = input("Name des Kontakts zum Löschen eingeben: ")
+    treffer = kontakte_suchen(db, name)
+
+    if not treffer:
+        print("\nKein Kontakt gefunden.\n")
+        return
+
+    print("\nGefundene Kontakte:")
+    for k in treffer:
+        print(f"ID: {k[0]}, Name: {k[1]}, Telefon: {k[2]}, Email: {k[3]}")
+    
+    try:
+        id_loeschen = int(input("\nID des zu löschenden Kontakts eingeben: "))
+    except ValueError:
+        print("Ungültige Eingabe.")
+        return
+
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM kontakte WHERE id = ?", (id_loeschen,))
+    db.commit()
+    print("Kontakt wurde gelöscht.\n")
+
+# Hauptprogramm
 if __name__ == "__main__":
-    _db = connect_db()
+    db = connect_db()
 
     while True:
-        print("Kontakt hinzufügen(1)\nProgramm schliessen(0)\nKontakte anzeigen(2)\n")
-        try:
-            _choiche = int(input("Was moechten sie tun (Zahl eingeben): "))
-        except ValueError:
-            print("Bitte eine gültige Zahl eingeben.")
-            continue  # Schleife von vorne starten
+        print("Kontaktverwaltung")
+        print("----------------------------")
+        print("1 - Kontakt hinzufügen")
+        print("2 - Kontakte anzeigen")
+        print("3 - Kontakt löschen")
+        print("4 - Kontakt bearbeiten (in Entwicklung)")
+        print("0 - Programm beenden")
+        print("----------------------------")
 
-        if _choiche == 0:
-            print("Ciao")
+        try:
+            auswahl = int(input("Was möchtest du tun? "))
+        except ValueError:
+            print("Bitte eine gültige Zahl eingeben.\n")
+            continue
+
+        clear_screen()
+
+        if auswahl == 0:
+            print("Programm beendet.")
             break
-        elif _choiche == 1:
-            clear_screen()
-            _name = input("name: ")
-            _tel = input("tel: ")
-            _email = input("email: ")
-            kontakt_hinzufügen(_db, _name, _tel, _email)
-        elif _choiche == 2:
-            kontakte_anzeigen(_db)
+        elif auswahl == 1:
+            name = input("Name: ")
+            telefon = input("Telefon: ")
+            email = input("E-Mail: ")
+            kontakt_hinzufuegen(db, name, telefon, email)
+        elif auswahl == 2:
+            kontakte_anzeigen(db)
+        elif auswahl == 3:
+            kontakte_loeschen(db)
+        elif auswahl == 4:
+            print("Funktion zum Bearbeiten wird noch entwickelt.\n")
+        else:
+            print("Ungültige Auswahl.\n")
