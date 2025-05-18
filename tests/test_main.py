@@ -1,5 +1,5 @@
 import unittest
-from main import main
+from datenbank_funktion import main
 
 class TestMain(unittest.TestCase):
     def test_main_runs(self):
