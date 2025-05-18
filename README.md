@@ -11,7 +11,7 @@ Dieses Repository dient als Grundgerüst für Python-Projekte.
 ## Ausführen
 
 ```bash
-python main.py
+python datenbank_gui.py
 ```
 
 ## Lizenz
