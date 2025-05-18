@@ -119,7 +119,7 @@ def kontakte_bearbeiten(db):
 
 
 # Hauptprogramm
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     db = connect_db()
 
     while True:
@@ -156,3 +156,5 @@ if __name__ == "__main__":
             kontakte_bearbeiten(db)
         else:
             print("Ungültige Auswahl.\n")
+
+"""           
